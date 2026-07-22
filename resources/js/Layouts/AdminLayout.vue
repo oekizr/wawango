@@ -3,10 +3,10 @@ import { Link } from '@inertiajs/vue3';
 import RoleTopbar from '@/Components/RoleTopbar.vue';
 
 const navigation = [
-    { name: 'Dashboard', href: 'admin.dashboard', enabled: true },
-    { name: 'Penyedia Jasa', enabled: false },
-    { name: 'User', enabled: false },
-    { name: 'Order', enabled: false },
+    { name: 'Dashboard', href: 'admin.dashboard', active: 'admin.dashboard', enabled: true },
+    { name: 'Penyedia Jasa', href: 'admin.providers.index', active: 'admin.providers.*', enabled: true },
+    { name: 'User', href: 'admin.users.index', active: 'admin.users.*', enabled: true },
+    { name: 'Order', href: 'admin.orders.index', active: 'admin.orders.*', enabled: true },
 ];
 </script>
 
@@ -26,7 +26,7 @@ const navigation = [
                         class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-primary-50 hover:text-primary-700 dark:text-gray-300 dark:hover:bg-gray-800"
                         :class="{
                             'bg-primary-50 text-primary-700 dark:bg-gray-800':
-                                route().current(item.href),
+                                route().current(item.active),
                         }"
                     >
                         {{ item.name }}
