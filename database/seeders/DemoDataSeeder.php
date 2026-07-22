@@ -85,8 +85,27 @@ class DemoDataSeeder extends Seeder
             ['Es Cola', 8000],
         ]);
 
-        // Beberapa pemesan untuk uji coba login & RBAC.
-        User::factory(5)
+        // Dua akun pemesan dengan email tetap, supaya gampang dipakai untuk testing.
+        $pemesan1 = User::factory()->create([
+            'name' => 'Budi Santoso',
+            'divisi' => 'IT',
+            'lantai' => '3',
+            'no_hp' => '081234567801',
+            'email' => 'pemesan1@wawango.test',
+        ]);
+        $pemesan1->assignRole(RoleName::Pemesan->value);
+
+        $pemesan2 = User::factory()->create([
+            'name' => 'Citra Lestari',
+            'divisi' => 'Finance',
+            'lantai' => '5',
+            'no_hp' => '081234567802',
+            'email' => 'pemesan2@wawango.test',
+        ]);
+        $pemesan2->assignRole(RoleName::Pemesan->value);
+
+        // Beberapa pemesan tambahan (email acak) untuk variasi data uji.
+        User::factory(3)
             ->create()
             ->each(fn (User $user) => $user->assignRole(RoleName::Pemesan->value));
     }

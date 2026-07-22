@@ -36,7 +36,9 @@ Aplikasi dapat diakses di `http://localhost:8002`.
 | Admin | admin@wawango.test | password |
 | Penyedia Jasa | wawan@wawango.test | password |
 | Penyedia Jasa | sari@wawango.test | password |
-| Pemesan | (5 akun acak, lihat `php artisan tinker` → `User::role('pemesan')->get()`) | password |
+| Pemesan | pemesan1@wawango.test | password |
+| Pemesan | pemesan2@wawango.test | password |
+| Pemesan | (3 akun acak tambahan, lihat `php artisan tinker` → `User::role('pemesan')->get()`) | password |
 
 ## Testing
 
