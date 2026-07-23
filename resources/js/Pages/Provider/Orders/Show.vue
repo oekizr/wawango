@@ -38,11 +38,22 @@ const reasonLabels = {
     menu_habis: 'Menu Habis',
     barang_tidak_ada: 'Barang Tidak Ada',
     cuaca: 'Cuaca',
+    tidak_dikonfirmasi: 'Tidak Dikonfirmasi',
+    lainnya: 'Lainnya',
+};
+
+// "Tidak Dikonfirmasi" is set automatically by the system (10-minute
+// confirmation timeout) — not a reason the provider picks manually.
+const selectableReasons = {
+    toko_tutup: 'Toko Tutup',
+    menu_habis: 'Menu Habis',
+    barang_tidak_ada: 'Barang Tidak Ada',
+    cuaca: 'Cuaca',
     lainnya: 'Lainnya',
 };
 
 const advanceLabel = computed(() => ({
-    menunggu: 'Proses Pesanan',
+    menunggu: 'Konfirmasi Pesanan',
     diproses: 'Tandai Sudah Dibelikan',
     dibelikan: 'Tandai Dalam Pengantaran',
     diantar: 'Selesaikan Pesanan',
@@ -139,6 +150,14 @@ function submitIssue() {
                 </div>
             </div>
 
+            <div
+                v-if="order.status === 'menunggu' && order.confirm_deadline"
+                class="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
+            >
+                ⏱ Konfirmasi sebelum {{ new Date(order.confirm_deadline).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }},
+                atau order otomatis dibatalkan.
+            </div>
+
             <div v-if="!isTerminal" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
                 <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Aksi</h2>
                 <div class="flex flex-col gap-2 sm:flex-row">
@@ -183,7 +202,7 @@ function submitIssue() {
                         required
                     >
                         <option value="">— Pilih alasan —</option>
-                        <option v-for="(label, key) in reasonLabels" :key="key" :value="key">{{ label }}</option>
+                        <option v-for="(label, key) in selectableReasons" :key="key" :value="key">{{ label }}</option>
                     </select>
                 </div>
                 <div class="mt-4">

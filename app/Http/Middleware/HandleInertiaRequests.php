@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -30,13 +31,39 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
+        $role = $user?->getRoleNames()->first();
 
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
-                'role' => $user?->getRoleNames()->first(),
+                'role' => $role,
             ],
+            'notifications' => $user ? [
+                'unread_count' => $user->unreadNotifications()->count(),
+                'items' => $user->unreadNotifications()->latest()->limit(10)->get()->map(fn (DatabaseNotification $n) => [
+                    'id' => $n->id,
+                    'message' => $n->data['message'] ?? '',
+                    'created_at' => $n->created_at,
+                    'url' => $this->resolveNotificationUrl($n, $role),
+                ]),
+            ] : null,
         ];
+    }
+
+    private function resolveNotificationUrl(DatabaseNotification $notification, ?string $role): ?string
+    {
+        $orderId = $notification->data['order_id'] ?? null;
+
+        if (! $orderId) {
+            return null;
+        }
+
+        return match ($role) {
+            'admin' => route('admin.orders.show', $orderId),
+            'penyedia_jasa' => route('provider.orders.show', $orderId),
+            'pemesan' => route('pemesan.orders.show', $orderId),
+            default => null,
+        };
     }
 }

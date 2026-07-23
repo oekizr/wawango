@@ -70,6 +70,9 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
                     <Badge :tone="statusTones[order.status]">{{ statusLabels[order.status] }}</Badge>
                 </div>
                 <p class="mt-2 text-sm font-medium text-gray-700 dark:text-gray-200">{{ rupiah(order.total) }}</p>
+                <p v-if="order.status === 'menunggu' && order.confirm_deadline" class="mt-1 text-xs text-yellow-600 dark:text-yellow-400">
+                    ⏱ Konfirmasi sebelum {{ new Date(order.confirm_deadline).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }}
+                </p>
             </Link>
 
             <p v-if="orders.data.length === 0" class="py-8 text-center text-gray-400">Belum ada pesanan.</p>

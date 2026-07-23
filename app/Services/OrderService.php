@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\OrderNotConfirmedNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -39,7 +40,47 @@ class OrderService
             ]);
         }
 
+        // Leaving "menunggu" is the provider's confirmation that they can
+        // fulfil the order — record it so the auto-cancel timeout knows
+        // to leave this order alone.
+        if ($current === OrderStatus::Menunggu && $order->confirmed_at === null) {
+            $order->confirmed_at = now();
+        }
+
         return $this->transitionTo($order, $next->value, $actor, $note);
+    }
+
+    /**
+     * System-initiated cancellation for orders the provider never confirmed
+     * within the allotted window. No acting user — triggered by the
+     * orders:expire-unconfirmed scheduled command.
+     */
+    public function autoCancelUnconfirmed(Order $order): Order
+    {
+        $order = DB::transaction(function () use ($order) {
+            $order->status = OrderStatus::Dibatalkan->value;
+            $order->save();
+
+            $order->statusHistories()->create([
+                'changed_by' => null,
+                'status' => OrderStatus::Dibatalkan->value,
+                'note' => 'Dibatalkan otomatis: penyedia jasa tidak mengkonfirmasi pesanan dalam 10 menit.',
+                'created_at' => now(),
+            ]);
+
+            $order->issues()->create([
+                'reason' => 'tidak_dikonfirmasi',
+                'note' => 'Penyedia jasa tidak mengkonfirmasi pesanan dalam 10 menit.',
+                'created_by' => null,
+                'created_at' => now(),
+            ]);
+
+            return $order->fresh();
+        });
+
+        $order->user?->notify(new OrderNotConfirmedNotification($order));
+
+        return $order;
     }
 
     public function cancel(Order $order, User $actor, ?string $reason = null, ?string $note = null): Order

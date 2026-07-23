@@ -26,6 +26,15 @@ const statusLabels = {
     dibatalkan: 'Dibatalkan',
 };
 
+const reasonLabels = {
+    toko_tutup: 'Toko sedang tutup',
+    menu_habis: 'Menu habis',
+    barang_tidak_ada: 'Barang tidak ada',
+    cuaca: 'Kendala cuaca',
+    tidak_dikonfirmasi: 'Penyedia jasa tidak mengkonfirmasi pesanan',
+    lainnya: 'Kendala lain',
+};
+
 const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
 </script>
 
@@ -89,11 +98,15 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
                 </div>
             </div>
 
-            <div v-if="order.issues?.length" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
-                <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Kendala</h2>
-                <p class="text-sm text-gray-600 dark:text-gray-300">
-                    Pesanan mengalami kendala, silakan cek pesan dari penyedia jasa di bawah.
-                </p>
+            <div v-if="order.issues?.length" class="rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
+                <h2 class="mb-2 text-sm font-semibold text-red-800 dark:text-red-200">Kendala Pesanan</h2>
+                <ul class="space-y-1 text-sm text-red-700 dark:text-red-300">
+                    <li v-for="(issue, i) in order.issues" :key="i">
+                        <span class="font-medium">{{ reasonLabels[issue.reason] ?? issue.reason }}</span>
+                        <span v-if="issue.reason === 'tidak_dikonfirmasi'"> ({{ order.provider }})</span>
+                        <span v-if="issue.note"> — {{ issue.note }}</span>
+                    </li>
+                </ul>
             </div>
 
             <div>

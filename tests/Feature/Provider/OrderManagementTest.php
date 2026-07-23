@@ -98,4 +98,15 @@ class OrderManagementTest extends TestCase
 
         $this->actingAs($user)->patch(route('provider.orders.advance', $otherOrder))->assertForbidden();
     }
+
+    public function test_confirming_from_menunggu_sets_confirmed_at(): void
+    {
+        $user = $this->providerUser();
+        $order = $this->orderFor($user->provider, 'menunggu');
+        $this->assertNull($order->confirmed_at);
+
+        $this->actingAs($user)->patch(route('provider.orders.advance', $order));
+
+        $this->assertNotNull($order->fresh()->confirmed_at);
+    }
 }

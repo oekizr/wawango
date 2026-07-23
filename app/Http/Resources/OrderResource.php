@@ -31,6 +31,8 @@ class OrderResource extends JsonResource
             'payment_method' => $this->payment_method,
             'notes' => $this->notes,
             'ordered_at' => $this->ordered_at,
+            'confirmed_at' => $this->confirmed_at,
+            'confirm_deadline' => $this->status === 'menunggu' ? $this->ordered_at?->copy()->addMinutes(10) : null,
             'completed_at' => $this->completed_at,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'status_histories' => $this->whenLoaded('statusHistories', fn () => $this->statusHistories

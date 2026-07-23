@@ -27,6 +27,7 @@ class Order extends Model
         'divisi_snapshot',
         'lantai_snapshot',
         'ordered_at',
+        'confirmed_at',
         'completed_at',
     ];
 
@@ -37,6 +38,7 @@ class Order extends Model
             'service_fee' => 'integer',
             'total' => 'integer',
             'ordered_at' => 'datetime',
+            'confirmed_at' => 'datetime',
             'completed_at' => 'datetime',
         ];
     }

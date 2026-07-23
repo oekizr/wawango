@@ -37,6 +37,17 @@ const reasonLabels = {
     menu_habis: 'Menu Habis',
     barang_tidak_ada: 'Barang Tidak Ada',
     cuaca: 'Cuaca',
+    tidak_dikonfirmasi: 'Tidak Dikonfirmasi',
+    lainnya: 'Lainnya',
+};
+
+// "Tidak Dikonfirmasi" is set automatically by the system (10-minute
+// provider timeout) — not something an admin picks when cancelling manually.
+const selectableReasons = {
+    toko_tutup: 'Toko Tutup',
+    menu_habis: 'Menu Habis',
+    barang_tidak_ada: 'Barang Tidak Ada',
+    cuaca: 'Cuaca',
     lainnya: 'Lainnya',
 };
 
@@ -230,7 +241,7 @@ function submitCancel() {
                         class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                     >
                         <option value="">— Pilih alasan (opsional) —</option>
-                        <option v-for="(label, key) in reasonLabels" :key="key" :value="key">{{ label }}</option>
+                        <option v-for="(label, key) in selectableReasons" :key="key" :value="key">{{ label }}</option>
                     </select>
                 </div>
                 <div class="mt-4">

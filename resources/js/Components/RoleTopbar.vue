@@ -1,10 +1,11 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useUiStore } from '@/stores/ui';
+import { computed } from 'vue';
 
 defineProps({
     roleLabel: { type: String, required: true },
@@ -12,6 +13,23 @@ defineProps({
 
 const auth = useAuthStore();
 const ui = useUiStore();
+
+const notifications = computed(() => usePage().props.notifications ?? { unread_count: 0, items: [] });
+
+function openNotification(notification) {
+    router.post(
+        route('notifications.read', notification.id),
+        {},
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                if (notification.url) {
+                    router.visit(notification.url);
+                }
+            },
+        },
+    );
+}
 </script>
 
 <template>
@@ -66,24 +84,56 @@ const ui = useUiStore();
                     </svg>
                 </button>
 
-                <button
-                    type="button"
-                    class="relative rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                >
-                    <svg
-                        class="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                        />
-                    </svg>
-                </button>
+                <Dropdown align="right" width="80" content-classes="py-1 bg-white dark:bg-gray-800">
+                    <template #trigger>
+                        <button
+                            type="button"
+                            class="relative rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+                        >
+                            <svg
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                                />
+                            </svg>
+                            <span
+                                v-if="notifications.unread_count > 0"
+                                class="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-semibold text-white"
+                            >
+                                {{ notifications.unread_count > 9 ? '9+' : notifications.unread_count }}
+                            </span>
+                        </button>
+                    </template>
+                    <template #content>
+                        <div class="max-h-80 overflow-y-auto">
+                            <p
+                                v-if="notifications.items.length === 0"
+                                class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400"
+                            >
+                                Tidak ada notifikasi baru.
+                            </p>
+                            <button
+                                v-for="item in notifications.items"
+                                :key="item.id"
+                                type="button"
+                                class="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
+                                @click="openNotification(item)"
+                            >
+                                <p>{{ item.message }}</p>
+                                <p class="mt-0.5 text-xs text-gray-400">
+                                    {{ new Date(item.created_at).toLocaleString('id-ID') }}
+                                </p>
+                            </button>
+                        </div>
+                    </template>
+                </Dropdown>
 
                 <Dropdown align="right" width="48">
                     <template #trigger>
