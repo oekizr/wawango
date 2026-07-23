@@ -4,11 +4,22 @@ import Badge from '@/Components/Badge.vue';
 import ChatThread from '@/Components/Chat/ChatThread.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import Echo from '@/echo';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     order: { type: Object, required: true },
+});
+
+onMounted(() => {
+    Echo.private(`orders.${props.order.id}`).listen('.status.changed', () => {
+        router.reload({ only: ['order'], preserveScroll: true });
+    });
+});
+
+onUnmounted(() => {
+    Echo.leave(`orders.${props.order.id}`);
 });
 
 const paymentStatusTones = { pending: 'yellow', diterima: 'green', ditolak: 'red' };

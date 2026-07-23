@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Events\NewOrderPlaced;
 use App\Models\Menu;
 use App\Models\Order;
 use App\Models\Store;
 use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -57,7 +59,7 @@ class CheckoutService
 
         $serviceFee = (int) $store->service_fee;
 
-        return DB::transaction(function () use ($pemesan, $store, $lineItems, $subtotal, $serviceFee, $paymentMethod, $notes) {
+        $order = DB::transaction(function () use ($pemesan, $store, $lineItems, $subtotal, $serviceFee, $paymentMethod, $notes) {
             $order = Order::create([
                 'kode_order' => 'WG'.strtoupper(Str::random(8)),
                 'user_id' => $pemesan->id,
@@ -93,5 +95,10 @@ class CheckoutService
 
             return $order->fresh();
         });
+
+        event(new NewOrderPlaced($order));
+        $order->provider?->user?->notify(new NewOrderNotification($order));
+
+        return $order;
     }
 }

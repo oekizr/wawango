@@ -6,15 +6,13 @@ use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class OrderNotConfirmedNotification extends Notification
+class NewOrderNotification extends Notification
 {
     use Queueable;
 
     public function __construct(private readonly Order $order) {}
 
     /**
-     * Get the notification's delivery channels.
-     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -23,18 +21,15 @@ class OrderNotConfirmedNotification extends Notification
     }
 
     /**
-     * Get the array representation of the notification.
-     *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => 'order_not_confirmed',
+            'type' => 'new_order',
             'order_id' => $this->order->id,
             'kode_order' => $this->order->kode_order,
-            'provider_name' => $this->order->provider?->user?->name ?? 'Penyedia jasa',
-            'message' => "{$this->order->provider?->user?->name} tidak mengkonfirmasi pesanan {$this->order->kode_order} dalam 10 menit, order dibatalkan otomatis.",
+            'message' => "Order baru {$this->order->kode_order} dari {$this->order->user?->name} menunggu konfirmasi Anda.",
         ];
     }
 }

@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Events\OrderStatusChanged;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\OrderCancelledNotification;
 use App\Notifications\OrderNotConfirmedNotification;
+use App\Notifications\OrderStatusNotification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -78,6 +81,7 @@ class OrderService
             return $order->fresh();
         });
 
+        event(new OrderStatusChanged($order));
         $order->user?->notify(new OrderNotConfirmedNotification($order));
 
         return $order;
@@ -93,7 +97,7 @@ class OrderService
             ]);
         }
 
-        return DB::transaction(function () use ($order, $actor, $reason, $note) {
+        $order = DB::transaction(function () use ($order, $actor, $reason, $note) {
             $order->status = OrderStatus::Dibatalkan->value;
             $order->save();
 
@@ -115,11 +119,16 @@ class OrderService
 
             return $order->fresh();
         });
+
+        event(new OrderStatusChanged($order));
+        $order->user?->notify(new OrderCancelledNotification($order, $reason, $note));
+
+        return $order;
     }
 
     private function transitionTo(Order $order, string $status, User $actor, ?string $note): Order
     {
-        return DB::transaction(function () use ($order, $status, $actor, $note) {
+        $order = DB::transaction(function () use ($order, $status, $actor, $note) {
             $order->status = $status;
 
             if ($status === OrderStatus::Selesai->value) {
@@ -137,5 +146,16 @@ class OrderService
 
             return $order->fresh();
         });
+
+        event(new OrderStatusChanged($order));
+
+        // "menunggu" is the initial state (not a transition worth notifying
+        // about) and "dibatalkan" is handled by cancel()/autoCancelUnconfirmed()
+        // with their own notification carrying a reason.
+        if (! in_array($status, [OrderStatus::Menunggu->value, OrderStatus::Dibatalkan->value], true)) {
+            $order->user?->notify(new OrderStatusNotification($order, OrderStatus::from($status)));
+        }
+
+        return $order;
     }
 }

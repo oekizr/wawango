@@ -3,9 +3,12 @@ import { Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import Toast from '@/Components/Toast.vue';
+import Echo from '@/echo';
 import { useAuthStore } from '@/stores/auth';
+import { useNotificationsStore } from '@/stores/notifications';
 import { useUiStore } from '@/stores/ui';
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 defineProps({
     roleLabel: { type: String, required: true },
@@ -13,8 +16,59 @@ defineProps({
 
 const auth = useAuthStore();
 const ui = useUiStore();
+const notificationsStore = useNotificationsStore();
+const toastRef = ref(null);
 
-const notifications = computed(() => usePage().props.notifications ?? { unread_count: 0, items: [] });
+const notifications = computed(() => ({
+    unread_count: notificationsStore.unreadCount,
+    items: notificationsStore.items,
+}));
+
+function resolveUrl(orderId) {
+    if (!orderId) return null;
+
+    return {
+        admin: route('admin.orders.show', orderId),
+        penyedia_jasa: route('provider.orders.show', orderId),
+        pemesan: route('pemesan.orders.show', orderId),
+    }[auth.role] ?? null;
+}
+
+function playBeep() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = 880;
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        oscillator.connect(gain);
+        gain.connect(ctx.destination);
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + 0.3);
+    } catch {
+        // sound is a nice-to-have, never block on it
+    }
+}
+
+onMounted(() => {
+    notificationsStore.hydrate(usePage().props.notifications);
+
+    if (auth.user?.id) {
+        Echo.private(`App.Models.User.${auth.user.id}`).notification((notification) => {
+            notificationsStore.pushLive({ ...notification, url: resolveUrl(notification.order_id) });
+            playBeep();
+            toastRef.value?.push(notification.message);
+        });
+    }
+});
+
+onUnmounted(() => {
+    if (auth.user?.id) {
+        Echo.leave(`App.Models.User.${auth.user.id}`);
+    }
+});
 
 function openNotification(notification) {
     router.post(
@@ -171,4 +225,6 @@ function openNotification(notification) {
             </div>
         </div>
     </header>
+
+    <Toast ref="toastRef" />
 </template>

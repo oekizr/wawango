@@ -1,12 +1,15 @@
 <script setup>
 import { router, useForm } from '@inertiajs/vue3';
+import Echo from '@/echo';
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
 
 const props = defineProps({
     orderId: { type: [Number, String], required: true },
     messages: { type: Array, default: () => [] },
     sendRouteName: { type: String, required: true }, // e.g. 'provider.orders.messages.store'
-    pollSeconds: { type: Number, default: 5 },
+    // Realtime push (see onMounted below) is the primary delivery path; this
+    // poll is just a slow fallback in case the socket connection drops.
+    pollSeconds: { type: Number, default: 30 },
 });
 
 const form = useForm({ body: '' });
@@ -36,6 +39,10 @@ function send() {
 onMounted(() => {
     scrollToBottom();
 
+    Echo.private(`orders.${props.orderId}`).listen('.message.posted', () => {
+        router.reload({ only: ['order'], preserveScroll: true });
+    });
+
     pollTimer = setInterval(() => {
         router.reload({ only: ['order'], preserveScroll: true });
     }, props.pollSeconds * 1000);
@@ -43,6 +50,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (pollTimer) clearInterval(pollTimer);
+    Echo.leave(`orders.${props.orderId}`);
 });
 
 watch(

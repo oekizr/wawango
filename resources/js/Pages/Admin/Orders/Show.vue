@@ -7,11 +7,22 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import WhatsAppLink from '@/Components/WhatsAppLink.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import Echo from '@/echo';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps({
     order: { type: Object, required: true },
+});
+
+onMounted(() => {
+    Echo.private(`orders.${props.order.id}`).listen('.status.changed', () => {
+        router.reload({ only: ['order'], preserveScroll: true });
+    });
+});
+
+onUnmounted(() => {
+    Echo.leave(`orders.${props.order.id}`);
 });
 
 const statusTones = {

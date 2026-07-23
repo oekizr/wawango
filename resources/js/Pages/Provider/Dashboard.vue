@@ -1,13 +1,27 @@
 <script setup>
 import ProviderLayout from '@/Layouts/ProviderLayout.vue';
+import Echo from '@/echo';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { useAuthStore } from '@/stores/auth';
+import { onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     stats: { type: Object, required: true },
 });
 
 const auth = useAuthStore();
+
+onMounted(() => {
+    if (!auth.providerId) return;
+
+    Echo.private(`providers.${auth.providerId}`).listen('.order.created', () => {
+        router.reload({ only: ['stats'], preserveScroll: true });
+    });
+});
+
+onUnmounted(() => {
+    if (auth.providerId) Echo.leave(`providers.${auth.providerId}`);
+});
 
 const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
 

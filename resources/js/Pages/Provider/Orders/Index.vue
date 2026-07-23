@@ -2,12 +2,28 @@
 import ProviderLayout from '@/Layouts/ProviderLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import Pagination from '@/Components/Pagination.vue';
+import Echo from '@/echo';
+import { useAuthStore } from '@/stores/auth';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps({
     orders: { type: Object, required: true },
     filters: { type: Object, default: () => ({}) },
+});
+
+const auth = useAuthStore();
+
+onMounted(() => {
+    if (!auth.providerId) return;
+
+    Echo.private(`providers.${auth.providerId}`).listen('.order.created', () => {
+        router.reload({ only: ['orders'], preserveScroll: true });
+    });
+});
+
+onUnmounted(() => {
+    if (auth.providerId) Echo.leave(`providers.${auth.providerId}`);
 });
 
 const statusTones = {

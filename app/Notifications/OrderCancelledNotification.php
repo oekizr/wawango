@@ -6,15 +6,13 @@ use App\Models\Order;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
-class PaymentVerifiedNotification extends Notification
+class OrderCancelledNotification extends Notification
 {
     use Queueable;
 
-    public function __construct(private readonly Order $order, private readonly bool $accepted) {}
+    public function __construct(private readonly Order $order, private readonly ?string $reason = null, private readonly ?string $note = null) {}
 
     /**
-     * Get the notification's delivery channels.
-     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
@@ -23,21 +21,18 @@ class PaymentVerifiedNotification extends Notification
     }
 
     /**
-     * Get the array representation of the notification.
-     *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
-        $message = $this->accepted
-            ? "Pembayaran untuk order {$this->order->kode_order} telah diterima."
-            : "Pembayaran untuk order {$this->order->kode_order} ditolak, silakan upload ulang bukti pembayaran.";
+        $detail = $this->note ?? $this->reason;
+        $message = "Order {$this->order->kode_order} dibatalkan.".($detail ? " Alasan: {$detail}" : '');
 
         return [
-            'type' => 'payment_verified',
+            'type' => 'order_cancelled',
             'order_id' => $this->order->id,
             'kode_order' => $this->order->kode_order,
-            'accepted' => $this->accepted,
+            'reason' => $this->reason,
             'message' => $message,
         ];
     }
