@@ -103,7 +103,7 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
             <button
                 type="button"
                 class="mx-auto flex w-full max-w-3xl items-center justify-between rounded-xl bg-primary-600 px-4 py-3 text-white shadow-lg hover:bg-primary-700"
-                @click="router.visit(route('pemesan.checkout.show'))"
+                @click="router.visit(route('pemesan.checkout.show', { store_id: store.id }))"
             >
                 <span>Keranjang ({{ cart.totalQty }})</span>
                 <span class="font-semibold">{{ rupiah(cart.subtotal) }}</span>

@@ -3,6 +3,7 @@ import ProviderLayout from '@/Layouts/ProviderLayout.vue';
 import Badge from '@/Components/Badge.vue';
 import Modal from '@/Components/Modal.vue';
 import InputLabel from '@/Components/InputLabel.vue';
+import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
@@ -80,6 +81,16 @@ function submitIssue() {
         onSuccess: () => (showIssueModal.value = false),
     });
 }
+
+const paymentStatusTones = { pending: 'yellow', diterima: 'green', ditolak: 'red' };
+const paymentStatusLabels = { pending: 'Menunggu Verifikasi', diterima: 'Diterima', ditolak: 'Ditolak' };
+
+const verifyForm = useForm({ status: '', note: '' });
+
+function verifyPayment(status) {
+    verifyForm.status = status;
+    verifyForm.patch(route('provider.orders.payment.verify', props.order.id), { preserveScroll: true });
+}
 </script>
 
 <template>
@@ -148,6 +159,38 @@ function submitIssue() {
                         Metode: <span class="font-medium uppercase">{{ order.payment_method }}</span>
                     </p>
                 </div>
+            </div>
+
+            <div v-if="order.payment" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
+                <div class="mb-3 flex items-center justify-between">
+                    <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Pembayaran</h2>
+                    <Badge :tone="paymentStatusTones[order.payment.status]">
+                        {{ paymentStatusLabels[order.payment.status] }}
+                    </Badge>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-300">
+                    Metode: <span class="font-medium uppercase">{{ order.payment.method }}</span> ·
+                    {{ rupiah(order.payment.amount) }}
+                </p>
+
+                <img
+                    v-if="order.payment.proof_url"
+                    :src="order.payment.proof_url"
+                    class="mt-3 max-h-64 rounded-lg border border-gray-100 object-contain dark:border-gray-800"
+                />
+                <p v-else-if="order.payment.method !== 'cash'" class="mt-2 text-xs text-gray-400">
+                    Pemesan belum mengunggah bukti pembayaran.
+                </p>
+
+                <div v-if="order.payment.status === 'pending'" class="mt-3 flex gap-2">
+                    <PrimaryButton :disabled="verifyForm.processing" @click="verifyPayment('diterima')">
+                        Terima Pembayaran
+                    </PrimaryButton>
+                    <DangerButton :disabled="verifyForm.processing" @click="verifyPayment('ditolak')">
+                        Tolak Pembayaran
+                    </DangerButton>
+                </div>
+                <InputError class="mt-1" :message="verifyForm.errors.status" />
             </div>
 
             <div

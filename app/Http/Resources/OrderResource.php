@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class OrderResource extends JsonResource
 {
@@ -49,12 +50,23 @@ class OrderResource extends JsonResource
                 'note' => $issue->note,
                 'created_at' => $issue->created_at,
             ])),
-            'payment' => $this->whenLoaded('payment', fn () => $this->payment ? [
-                'method' => $this->payment->method,
-                'status' => $this->payment->status,
-                'amount' => $this->payment->amount,
-                'paid_at' => $this->payment->paid_at,
-            ] : null),
+            'payment' => $this->whenLoaded('payment', function () {
+                if (! $this->payment) {
+                    return null;
+                }
+
+                $latestProof = $this->payment->relationLoaded('proofs')
+                    ? $this->payment->proofs->sortByDesc('uploaded_at')->first()
+                    : null;
+
+                return [
+                    'method' => $this->payment->method,
+                    'status' => $this->payment->status,
+                    'amount' => $this->payment->amount,
+                    'paid_at' => $this->payment->paid_at,
+                    'proof_url' => $latestProof ? Storage::disk('public')->url($latestProof->image_path) : null,
+                ];
+            }),
             'messages' => $this->whenLoaded('messages', fn () => $this->messages
                 ->sortBy('created_at')
                 ->values()

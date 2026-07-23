@@ -4,6 +4,7 @@ use App\Http\Controllers\OrderMessageController;
 use App\Http\Controllers\Provider\DashboardController;
 use App\Http\Controllers\Provider\MenuController;
 use App\Http\Controllers\Provider\OrderController;
+use App\Http\Controllers\Provider\PaymentController;
 use App\Http\Controllers\Provider\ScheduleController;
 use App\Http\Controllers\Provider\StatusController;
 use App\Http\Controllers\Provider\StoreController;
@@ -28,4 +29,5 @@ Route::middleware(['auth', 'verified', 'role:penyedia_jasa'])
         Route::patch('orders/{order}/advance', [OrderController::class, 'advance'])->name('orders.advance');
         Route::patch('orders/{order}/report-issue', [OrderController::class, 'reportIssue'])->name('orders.reportIssue');
         Route::post('orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
+        Route::patch('orders/{order}/payment/verify', [PaymentController::class, 'verify'])->name('orders.payment.verify');
     });

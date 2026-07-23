@@ -42,7 +42,7 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
-        $order->load(['user', 'store', 'items', 'statusHistories.changedBy', 'issues', 'payment', 'messages.sender']);
+        $order->load(['user', 'store', 'items', 'statusHistories.changedBy', 'issues', 'payment.proofs', 'messages.sender']);
 
         return Inertia::render('Provider/Orders/Show', [
             'order' => new OrderResource($order),

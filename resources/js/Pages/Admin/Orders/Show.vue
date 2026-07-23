@@ -166,6 +166,11 @@ function submitCancel() {
                         Metode: <span class="font-medium uppercase">{{ order.payment_method }}</span>
                         <span v-if="order.payment"> — Status: {{ order.payment.status }}</span>
                     </p>
+                    <img
+                        v-if="order.payment?.proof_url"
+                        :src="order.payment.proof_url"
+                        class="mt-3 max-h-64 rounded-lg border border-gray-100 object-contain dark:border-gray-800"
+                    />
                 </div>
 
                 <div v-if="order.issues?.length" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">

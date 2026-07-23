@@ -3,6 +3,7 @@
 use App\Http\Controllers\OrderMessageController;
 use App\Http\Controllers\Pemesan\DashboardController;
 use App\Http\Controllers\Pemesan\OrderController;
+use App\Http\Controllers\Pemesan\PaymentController;
 use App\Http\Controllers\Pemesan\ProviderController;
 use App\Http\Controllers\Pemesan\StoreController;
 use Illuminate\Support\Facades\Route;
@@ -24,4 +25,5 @@ Route::middleware(['auth', 'verified', 'role:pemesan'])
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
+        Route::post('orders/{order}/payment-proof', [PaymentController::class, 'store'])->name('orders.paymentProof.store');
     });
