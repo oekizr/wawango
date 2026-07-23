@@ -6,6 +6,14 @@ menggunakan [Semantic Versioning](https://semver.org/lang/id/) — setiap
 "Stage" pengembangan dipetakan sebagai satu versi minor (0.x.0), perbaikan
 kecil di antara stage sebagai versi patch.
 
+## [0.6.1] - Fix: application timezone
+
+### Diperbaiki
+- `config('app.timezone')` diubah dari default `UTC` ke `Asia/Jakarta`
+  (`APP_TIMEZONE` env var baru). Sebelumnya `now()` di server berjalan 7 jam
+  di belakang waktu lokal, menyebabkan status buka/tutup penyedia jasa salah
+  dibandingkan dengan jadwal yang dientri dalam waktu lokal (WIB).
+
 ## [0.6.0] - Stage 6: Realtime (Laravel Reverb)
 
 ### Ditambahkan
