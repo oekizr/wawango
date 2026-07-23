@@ -4,8 +4,8 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
-import ScheduleEditor from './Partials/ScheduleEditor.vue';
-import ImageUploadField from './Partials/ImageUploadField.vue';
+import ScheduleEditor from '@/Components/ScheduleEditor.vue';
+import ImageUploadField from '@/Components/ImageUploadField.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 const form = useForm({

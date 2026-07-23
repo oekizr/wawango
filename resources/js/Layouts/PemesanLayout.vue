@@ -3,7 +3,8 @@ import { Link } from '@inertiajs/vue3';
 import RoleTopbar from '@/Components/RoleTopbar.vue';
 
 const navigation = [
-    { name: 'Beranda', href: 'pemesan.dashboard' },
+    { name: 'Beranda', href: 'pemesan.dashboard', active: 'pemesan.dashboard' },
+    { name: 'Order Saya', href: 'pemesan.orders.index', active: 'pemesan.orders.*' },
 ];
 </script>
 
@@ -28,7 +29,7 @@ const navigation = [
                 :href="route(item.href)"
                 class="flex flex-1 flex-col items-center gap-1 py-2 text-xs font-medium"
                 :class="
-                    route().current(item.href)
+                    route().current(item.active)
                         ? 'text-primary-600'
                         : 'text-gray-400'
                 "

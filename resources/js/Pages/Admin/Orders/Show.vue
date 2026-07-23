@@ -6,6 +6,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import DangerButton from '@/Components/DangerButton.vue';
+import WhatsAppLink from '@/Components/WhatsAppLink.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -92,6 +93,10 @@ function submitCancel() {
                         <div>
                             <dt class="text-gray-400">Divisi / Lantai</dt>
                             <dd class="text-gray-800 dark:text-gray-100">{{ order.divisi }} / Lt.{{ order.lantai }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-gray-400">No. HP Pemesan</dt>
+                            <dd><WhatsAppLink :phone="order.pemesan_no_hp" /></dd>
                         </div>
                         <div>
                             <dt class="text-gray-400">Toko</dt>

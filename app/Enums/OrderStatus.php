@@ -29,6 +29,21 @@ enum OrderStatus: string
     }
 
     /**
+     * The next status in the normal forward sequence, or null if already terminal.
+     * Used by the provider's "advance one step" action (admin may jump freely instead).
+     */
+    public function next(): ?self
+    {
+        return match ($this) {
+            self::Menunggu => self::Diproses,
+            self::Diproses => self::Dibelikan,
+            self::Dibelikan => self::Diantar,
+            self::Diantar => self::Selesai,
+            self::Selesai, self::Dibatalkan => null,
+        };
+    }
+
+    /**
      * @return array<int, self>
      */
     public static function activeStatuses(): array

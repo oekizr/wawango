@@ -18,10 +18,12 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'kode_order' => $this->kode_order,
             'pemesan' => $this->user?->name,
+            'pemesan_no_hp' => $this->user?->no_hp,
             'divisi' => $this->divisi_snapshot,
             'lantai' => $this->lantai_snapshot,
             'toko' => $this->store?->nama_toko,
             'provider' => $this->provider?->user?->name,
+            'provider_id' => $this->provider_id,
             'status' => $this->status,
             'subtotal' => $this->subtotal,
             'service_fee' => $this->service_fee,
@@ -51,6 +53,16 @@ class OrderResource extends JsonResource
                 'amount' => $this->payment->amount,
                 'paid_at' => $this->payment->paid_at,
             ] : null),
+            'messages' => $this->whenLoaded('messages', fn () => $this->messages
+                ->sortBy('created_at')
+                ->values()
+                ->map(fn ($message) => [
+                    'id' => $message->id,
+                    'body' => $message->body,
+                    'sender_name' => $message->sender?->name ?? 'Pengguna',
+                    'is_mine' => $message->sender_id === $request->user()?->id,
+                    'created_at' => $message->created_at,
+                ])),
         ];
     }
 }

@@ -75,4 +75,9 @@ class Order extends Model
     {
         return $this->hasOne(Payment::class);
     }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(OrderMessage::class);
+    }
 }

@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Storage;
 
 class ProviderService
 {
+    public function __construct(private readonly ScheduleService $scheduleService) {}
+
     public function create(array $data): Provider
     {
         return DB::transaction(function () use ($data) {
@@ -40,7 +42,7 @@ class ProviderService
             ]);
 
             $this->storeImages($provider, $data);
-            $this->syncSchedules($provider, $data['schedules']);
+            $this->scheduleService->sync($provider, $data['schedules']);
 
             return $provider->fresh(['user', 'schedules']);
         });
@@ -74,7 +76,7 @@ class ProviderService
             ]);
 
             $this->storeImages($provider, $data);
-            $this->syncSchedules($provider, $data['schedules']);
+            $this->scheduleService->sync($provider, $data['schedules']);
 
             return $provider->fresh(['user', 'schedules']);
         });
@@ -108,23 +110,6 @@ class ProviderService
 
         if ($provider->isDirty()) {
             $provider->save();
-        }
-    }
-
-    /**
-     * @param  array<int, array{day_of_week: int, is_active?: bool, open_time?: ?string, close_time?: ?string}>  $schedules
-     */
-    private function syncSchedules(Provider $provider, array $schedules): void
-    {
-        $provider->schedules()->delete();
-
-        foreach ($schedules as $schedule) {
-            $provider->schedules()->create([
-                'day_of_week' => $schedule['day_of_week'],
-                'is_active' => $schedule['is_active'] ?? false,
-                'open_time' => $schedule['open_time'] ?? '00:00',
-                'close_time' => $schedule['close_time'] ?? '00:00',
-            ]);
         }
     }
 }

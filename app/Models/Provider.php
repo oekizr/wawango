@@ -24,12 +24,14 @@ class Provider extends Model
         'no_rekening',
         'nama_pemilik_rekening',
         'is_active',
+        'manual_close_date',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'manual_close_date' => 'date',
         ];
     }
 
@@ -59,6 +61,20 @@ class Provider extends Model
     }
 
     public function isOpenNow(): bool
+    {
+        if ($this->isManuallyClosedToday()) {
+            return false;
+        }
+
+        return $this->isWithinScheduleNow();
+    }
+
+    public function isManuallyClosedToday(): bool
+    {
+        return $this->manual_close_date !== null && $this->manual_close_date->isToday();
+    }
+
+    public function isWithinScheduleNow(): bool
     {
         if (! $this->is_active) {
             return false;

@@ -31,6 +31,20 @@ class OrderRepository
     }
 
     /**
+     * @param  array{status?: ?string}  $filters
+     */
+    public function paginateForProvider(int $providerId, array $filters, int $perPage = 10): LengthAwarePaginator
+    {
+        return Order::query()
+            ->with(['user', 'store'])
+            ->where('provider_id', $providerId)
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->latest('ordered_at')
+            ->paginate($perPage)
+            ->withQueryString();
+    }
+
+    /**
      * Distinct divisi values found on orders, for filter dropdown options.
      *
      * @return array<int, string>
