@@ -6,6 +6,18 @@ menggunakan [Semantic Versioning](https://semver.org/lang/id/) — setiap
 "Stage" pengembangan dipetakan sebagai satu versi minor (0.x.0), perbaikan
 kecil di antara stage sebagai versi patch.
 
+## [0.7.0] - Kirim gambar di chat
+
+### Ditambahkan
+- Chat order (penyedia jasa & pemesan) sekarang bisa mengirim gambar, dari
+  galeri atau langsung dari kamera (mobile), untuk menunjukkan foto barang
+  atau lokasi barang diletakkan. Pesan boleh berisi teks saja, gambar saja,
+  atau keduanya.
+- Kolom `image_path` baru di `order_messages` (migrasi additive, tanpa
+  `migrate:fresh`, supaya data yang sudah ada tidak ikut terhapus).
+- Preview gambar sebelum dikirim (dengan tombol batal), dan gambar yang
+  terkirim bisa diklik untuk dilihat ukuran penuh.
+
 ## [0.6.3] - Fix: order items list showed "x" / RpNaN
 
 ### Diperbaiki

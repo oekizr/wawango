@@ -23,7 +23,8 @@ class OrderMessageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'body' => ['required', 'string', 'max:1000'],
+            'body' => ['nullable', 'required_without:image', 'string', 'max:1000'],
+            'image' => ['nullable', 'required_without:body', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ];
     }
 }

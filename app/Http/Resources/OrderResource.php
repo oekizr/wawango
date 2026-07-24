@@ -73,6 +73,7 @@ class OrderResource extends JsonResource
                 ->map(fn ($message) => [
                     'id' => $message->id,
                     'body' => $message->body,
+                    'image_url' => $message->image_path ? Storage::disk('public')->url($message->image_path) : null,
                     'sender_name' => $message->sender?->name ?? 'Pengguna',
                     'is_mine' => $message->sender_id === $request->user()?->id,
                     'created_at' => $message->created_at,

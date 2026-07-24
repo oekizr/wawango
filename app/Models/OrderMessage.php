@@ -14,6 +14,7 @@ class OrderMessage extends Model
         'order_id',
         'sender_id',
         'body',
+        'image_path',
         'read_at',
     ];
 
