@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Pemesan\CheckoutRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\Provider;
 use App\Models\Store;
 use App\Services\CheckoutService;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -38,25 +38,13 @@ class OrderController extends Controller
 
         return Inertia::render('Pemesan/Orders/Show', [
             'order' => (new OrderResource($order))->resolve(),
+            'paymentInfo' => $this->presentPaymentInfo($order->provider),
         ]);
     }
 
-    public function checkout(Request $request): Response
+    public function checkout(): Response
     {
-        $provider = null;
-
-        if ($storeId = $request->query('store_id')) {
-            $provider = Store::find($storeId)?->provider;
-        }
-
-        return Inertia::render('Pemesan/Checkout', [
-            'paymentInfo' => $provider ? [
-                'nama_bank' => $provider->nama_bank,
-                'no_rekening' => $provider->no_rekening,
-                'nama_pemilik_rekening' => $provider->nama_pemilik_rekening,
-                'qris_image_url' => $provider->qris_image ? Storage::disk('public')->url($provider->qris_image) : null,
-            ] : null,
-        ]);
+        return Inertia::render('Pemesan/Checkout');
     }
 
     public function store(CheckoutRequest $request): RedirectResponse
@@ -67,11 +55,23 @@ class OrderController extends Controller
             $request->user(),
             $store,
             $request->validated('items'),
-            $request->validated('payment_method'),
             $request->validated('notes'),
         );
 
         return redirect()->route('pemesan.orders.show', $order)
             ->with('success', 'Pesanan berhasil dibuat, menunggu konfirmasi penyedia jasa.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function presentPaymentInfo(?Provider $provider): array
+    {
+        return [
+            'nama_bank' => $provider?->nama_bank,
+            'no_rekening' => $provider?->no_rekening,
+            'nama_pemilik_rekening' => $provider?->nama_pemilik_rekening,
+            'qris_image_url' => $provider?->qris_image ? Storage::disk('public')->url($provider->qris_image) : null,
+        ];
     }
 }

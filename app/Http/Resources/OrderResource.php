@@ -29,7 +29,6 @@ class OrderResource extends JsonResource
             'subtotal' => $this->subtotal,
             'service_fee' => $this->service_fee,
             'total' => $this->total,
-            'payment_method' => $this->payment_method,
             'notes' => $this->notes,
             'ordered_at' => $this->ordered_at,
             'confirmed_at' => $this->confirmed_at,

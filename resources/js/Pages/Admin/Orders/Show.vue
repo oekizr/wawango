@@ -174,7 +174,7 @@ function submitCancel() {
                 <div class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
                     <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Pembayaran</h2>
                     <p class="text-sm text-gray-600 dark:text-gray-300">
-                        Metode: <span class="font-medium uppercase">{{ order.payment_method }}</span>
+                        Metode: <span class="font-medium uppercase">{{ order.payment?.method ?? 'Belum dipilih' }}</span>
                         <span v-if="order.payment"> — Status: {{ order.payment.status }}</span>
                     </p>
                     <img

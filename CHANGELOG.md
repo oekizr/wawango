@@ -6,6 +6,26 @@ menggunakan [Semantic Versioning](https://semver.org/lang/id/) — setiap
 "Stage" pengembangan dipetakan sebagai satu versi minor (0.x.0), perbaikan
 kecil di antara stage sebagai versi patch.
 
+## [0.8.0] - Metode pembayaran dipilih setelah konfirmasi
+
+### Diubah
+- Checkout tidak lagi meminta metode pembayaran di awal — toko bisa saja
+  tutup atau menunya tidak tersedia, jadi percuma ditanyakan sebelum
+  penyedia jasa mengkonfirmasi pesanan. Order kini dibuat tanpa metode
+  pembayaran/`payments` row; kolom `orders.payment_method` yang redundan
+  dihapus (migrasi additive, bukan `migrate:fresh`, supaya data yang sudah
+  ada tidak ikut hilang).
+- Setelah penyedia jasa mengkonfirmasi pesanan (status keluar dari
+  "menunggu"), pemesan melihat pesan "Penyedia jasa sudah menerima pesanan
+  Anda, silahkan lakukan pembayaran melalui metode berikut" di halaman
+  detail order, lalu memilih cash/transfer/QRIS di sana.
+- Halaman detail order Penyedia Jasa: bagian "Aksi" (Konfirmasi Pesanan /
+  Laporkan Kendala) dipindah ke atas bagian "Pembayaran", supaya urutan
+  aksi mengikuti alur kerja yang sebenarnya.
+- Setelah order berstatus "Selesai", halaman detail order Pemesan
+  menampilkan pesan "Pesanan Sudah Selesai" beserta tombol kembali ke
+  halaman utama, di bagian paling bawah.
+
 ## [0.7.0] - Kirim gambar di chat
 
 ### Ditambahkan

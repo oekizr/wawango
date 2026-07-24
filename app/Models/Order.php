@@ -22,7 +22,6 @@ class Order extends Model
         'subtotal',
         'service_fee',
         'total',
-        'payment_method',
         'notes',
         'divisi_snapshot',
         'lantai_snapshot',

@@ -59,7 +59,6 @@ class CheckoutTest extends TestCase
             'items' => [
                 ['menu_id' => $menu->id, 'qty' => 2, 'note' => 'tidak pedas'],
             ],
-            'payment_method' => 'cash',
         ]);
 
         $response->assertRedirect();
@@ -78,11 +77,9 @@ class CheckoutTest extends TestCase
             'price_snapshot' => 15000,
             'subtotal' => 30000,
         ]);
-        $this->assertDatabaseHas('payments', [
-            'method' => 'cash',
-            'status' => 'pending',
-            'amount' => 40000,
-        ]);
+        // Payment method isn't chosen at checkout - only after the provider
+        // confirms the order (see ChoosePaymentMethodTest).
+        $this->assertDatabaseCount('payments', 0);
     }
 
     public function test_checkout_rejected_when_store_closed(): void
@@ -93,7 +90,6 @@ class CheckoutTest extends TestCase
         $response = $this->actingAs($this->pemesanUser())->post(route('pemesan.checkout.store'), [
             'store_id' => $store->id,
             'items' => [['menu_id' => $menu->id, 'qty' => 1]],
-            'payment_method' => 'cash',
         ]);
 
         $response->assertSessionHasErrors('store_id');
@@ -108,7 +104,6 @@ class CheckoutTest extends TestCase
         $response = $this->actingAs($this->pemesanUser())->post(route('pemesan.checkout.store'), [
             'store_id' => $store->id,
             'items' => [['menu_id' => $menu->id, 'qty' => 1]],
-            'payment_method' => 'cash',
         ]);
 
         $response->assertSessionHasErrors('items');

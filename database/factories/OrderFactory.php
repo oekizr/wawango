@@ -44,7 +44,6 @@ class OrderFactory extends Factory
             'subtotal' => $subtotal,
             'service_fee' => $serviceFee,
             'total' => $subtotal + $serviceFee,
-            'payment_method' => fake()->randomElement(['cash', 'transfer', 'qris']),
             'notes' => null,
             'divisi_snapshot' => fake()->randomElement(['IT', 'Finance', 'HR', 'Marketing']),
             'lantai_snapshot' => (string) fake()->numberBetween(1, 10),

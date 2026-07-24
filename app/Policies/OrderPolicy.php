@@ -60,6 +60,11 @@ class OrderPolicy
         return $this->isOwningPemesan($user, $order);
     }
 
+    public function choosePaymentMethod(User $user, Order $order): bool
+    {
+        return $this->isOwningPemesan($user, $order);
+    }
+
     private function isOwningProvider(User $user, Order $order): bool
     {
         return $user->provider?->id === $order->provider_id;

@@ -167,8 +167,28 @@ function verifyPayment(status) {
                         <span>Total Bayar</span><span class="tabular-nums">{{ rupiah(order.total) }}</span>
                     </div>
                     <p class="text-gray-500 dark:text-gray-400">
-                        Metode: <span class="font-medium uppercase">{{ order.payment_method }}</span>
+                        Metode: <span class="font-medium uppercase">{{ order.payment?.method ?? 'Belum dipilih pemesan' }}</span>
                     </p>
+                </div>
+            </div>
+
+            <div
+                v-if="order.status === 'menunggu' && order.confirm_deadline"
+                class="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
+            >
+                ⏱ Konfirmasi sebelum {{ new Date(order.confirm_deadline).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }},
+                atau order otomatis dibatalkan.
+            </div>
+
+            <div v-if="!isTerminal" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
+                <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Aksi</h2>
+                <div class="flex flex-col gap-2 sm:flex-row">
+                    <PrimaryButton class="justify-center" :disabled="advanceForm.processing" @click="submitAdvance">
+                        {{ advanceLabel }}
+                    </PrimaryButton>
+                    <SecondaryButton class="justify-center" @click="showIssueModal = true">
+                        Laporkan Kendala
+                    </SecondaryButton>
                 </div>
             </div>
 
@@ -202,26 +222,6 @@ function verifyPayment(status) {
                     </DangerButton>
                 </div>
                 <InputError class="mt-1" :message="verifyForm.errors.status" />
-            </div>
-
-            <div
-                v-if="order.status === 'menunggu' && order.confirm_deadline"
-                class="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
-            >
-                ⏱ Konfirmasi sebelum {{ new Date(order.confirm_deadline).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) }},
-                atau order otomatis dibatalkan.
-            </div>
-
-            <div v-if="!isTerminal" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
-                <h2 class="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-200">Aksi</h2>
-                <div class="flex flex-col gap-2 sm:flex-row">
-                    <PrimaryButton class="justify-center" :disabled="advanceForm.processing" @click="submitAdvance">
-                        {{ advanceLabel }}
-                    </PrimaryButton>
-                    <SecondaryButton class="justify-center" @click="showIssueModal = true">
-                        Laporkan Kendala
-                    </SecondaryButton>
-                </div>
             </div>
 
             <div v-if="order.issues?.length" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">

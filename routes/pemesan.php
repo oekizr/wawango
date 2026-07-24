@@ -25,5 +25,6 @@ Route::middleware(['auth', 'verified', 'role:pemesan'])
         Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.show');
         Route::post('orders/{order}/messages', [OrderMessageController::class, 'store'])->name('orders.messages.store');
+        Route::post('orders/{order}/payment-method', [PaymentController::class, 'chooseMethod'])->name('orders.paymentMethod.store');
         Route::post('orders/{order}/payment-proof', [PaymentController::class, 'store'])->name('orders.paymentProof.store');
     });

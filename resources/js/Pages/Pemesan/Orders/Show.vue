@@ -10,6 +10,7 @@ import { computed, onMounted, onUnmounted } from 'vue';
 
 const props = defineProps({
     order: { type: Object, required: true },
+    paymentInfo: { type: Object, default: null },
 });
 
 onMounted(() => {
@@ -37,6 +38,19 @@ function submitProof() {
         forceFormData: true,
         onSuccess: () => (proofForm.bukti = null),
     });
+}
+
+// Payment method is only asked once the provider has confirmed the order —
+// no point picking one if the store turns out to be closed or the menu
+// unavailable and the order gets cancelled instead.
+const needsPaymentMethod = computed(
+    () => !props.order.payment && !['menunggu', 'dibatalkan'].includes(props.order.status),
+);
+
+const methodForm = useForm({ method: 'cash' });
+
+function submitPaymentMethod() {
+    methodForm.post(route('pemesan.orders.paymentMethod.store', props.order.id));
 }
 
 const statusTones = {
@@ -129,6 +143,63 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
                 </div>
             </div>
 
+            <div
+                v-if="order.status === 'menunggu'"
+                class="rounded-lg bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200"
+            >
+                Menunggu konfirmasi penyedia jasa. Anda bisa memilih metode pembayaran setelah pesanan dikonfirmasi.
+            </div>
+
+            <div v-if="needsPaymentMethod" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
+                <h2 class="mb-1 text-sm font-semibold text-gray-700 dark:text-gray-200">Pilih Metode Pembayaran</h2>
+                <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">
+                    Penyedia jasa sudah menerima pesanan Anda, silahkan lakukan pembayaran melalui metode berikut.
+                </p>
+
+                <form @submit.prevent="submitPaymentMethod">
+                    <div class="space-y-2 text-sm">
+                        <label class="flex items-center gap-2">
+                            <input v-model="methodForm.method" type="radio" value="cash" class="text-primary-600 focus:ring-primary-500" />
+                            Cash (bayar langsung)
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input v-model="methodForm.method" type="radio" value="transfer" class="text-primary-600 focus:ring-primary-500" />
+                            Transfer Bank
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input v-model="methodForm.method" type="radio" value="qris" class="text-primary-600 focus:ring-primary-500" />
+                            QRIS
+                        </label>
+                    </div>
+                    <InputError class="mt-2" :message="methodForm.errors.method" />
+
+                    <div
+                        v-if="methodForm.method === 'transfer' && paymentInfo"
+                        class="mt-3 rounded-lg bg-gray-50 p-3 text-sm dark:bg-gray-800"
+                    >
+                        <p class="font-medium text-gray-700 dark:text-gray-200">{{ paymentInfo.nama_bank ?? '-' }}</p>
+                        <p class="text-gray-600 dark:text-gray-300">{{ paymentInfo.no_rekening ?? '-' }}</p>
+                        <p class="text-xs text-gray-400">a.n. {{ paymentInfo.nama_pemilik_rekening ?? '-' }}</p>
+                    </div>
+
+                    <div
+                        v-if="methodForm.method === 'qris' && paymentInfo"
+                        class="mt-3 rounded-lg bg-gray-50 p-3 text-center text-sm dark:bg-gray-800"
+                    >
+                        <img
+                            v-if="paymentInfo.qris_image_url"
+                            :src="paymentInfo.qris_image_url"
+                            class="mx-auto h-40 w-40 object-contain"
+                        />
+                        <p v-else class="text-gray-400">Provider belum mengunggah QRIS.</p>
+                    </div>
+
+                    <PrimaryButton class="mt-3" :disabled="methodForm.processing">
+                        Pilih Metode Ini
+                    </PrimaryButton>
+                </form>
+            </div>
+
             <div v-if="order.payment" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
                 <div class="mb-3 flex items-center justify-between">
                     <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Pembayaran</h2>
@@ -181,6 +252,19 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
                     :messages="order.messages ?? []"
                     send-route-name="pemesan.orders.messages.store"
                 />
+            </div>
+
+            <div
+                v-if="order.status === 'selesai'"
+                class="rounded-xl bg-primary-50 p-6 text-center dark:bg-primary-900/20"
+            >
+                <p class="text-base font-semibold text-primary-700 dark:text-primary-300">Pesanan Sudah Selesai</p>
+                <Link
+                    :href="route('pemesan.dashboard')"
+                    class="mt-3 inline-block rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
+                >
+                    Kembali ke Halaman Utama
+                </Link>
             </div>
         </div>
     </PemesanLayout>

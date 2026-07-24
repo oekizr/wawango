@@ -28,7 +28,7 @@ class PaymentProofTest extends TestCase
         Storage::fake('public');
 
         $pemesan = $this->pemesanUser();
-        $order = Order::factory()->create(['user_id' => $pemesan->id, 'payment_method' => 'transfer']);
+        $order = Order::factory()->create(['user_id' => $pemesan->id]);
         Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'pending']);
 
         $response = $this->actingAs($pemesan)->post(route('pemesan.orders.paymentProof.store', $order), [
@@ -44,7 +44,7 @@ class PaymentProofTest extends TestCase
         Storage::fake('public');
 
         $pemesan = $this->pemesanUser();
-        $order = Order::factory()->create(['user_id' => $pemesan->id, 'payment_method' => 'cash']);
+        $order = Order::factory()->create(['user_id' => $pemesan->id]);
         Payment::factory()->create(['order_id' => $order->id, 'method' => 'cash', 'status' => 'pending']);
 
         $this->actingAs($pemesan)->post(route('pemesan.orders.paymentProof.store', $order), [
@@ -56,7 +56,7 @@ class PaymentProofTest extends TestCase
     {
         Storage::fake('public');
 
-        $order = Order::factory()->create(['payment_method' => 'transfer']);
+        $order = Order::factory()->create();
         Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'pending']);
 
         $this->actingAs($this->pemesanUser())->post(route('pemesan.orders.paymentProof.store', $order), [
@@ -69,7 +69,7 @@ class PaymentProofTest extends TestCase
         Storage::fake('public');
 
         $pemesan = $this->pemesanUser();
-        $order = Order::factory()->create(['user_id' => $pemesan->id, 'payment_method' => 'transfer']);
+        $order = Order::factory()->create(['user_id' => $pemesan->id]);
         Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'diterima']);
 
         $this->actingAs($pemesan)->post(route('pemesan.orders.paymentProof.store', $order), [
@@ -82,7 +82,7 @@ class PaymentProofTest extends TestCase
         Storage::fake('public');
 
         $pemesan = $this->pemesanUser();
-        $order = Order::factory()->create(['user_id' => $pemesan->id, 'payment_method' => 'transfer']);
+        $order = Order::factory()->create(['user_id' => $pemesan->id]);
         $payment = Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'ditolak']);
 
         $this->actingAs($pemesan)->post(route('pemesan.orders.paymentProof.store', $order), [

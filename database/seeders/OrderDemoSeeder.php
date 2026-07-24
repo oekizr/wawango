@@ -60,7 +60,6 @@ class OrderDemoSeeder extends Seeder
                 'subtotal' => $subtotal,
                 'service_fee' => $serviceFee,
                 'total' => $subtotal + $serviceFee,
-                'payment_method' => collect(['cash', 'transfer', 'qris'])->random(),
                 'notes' => null,
                 'divisi_snapshot' => $pemesan->divisi,
                 'lantai_snapshot' => $pemesan->lantai,
@@ -74,12 +73,16 @@ class OrderDemoSeeder extends Seeder
 
             $this->seedStatusHistory($order, $status, $orderedAt);
 
-            $order->payment()->create([
-                'method' => $order->payment_method,
-                'status' => $status === 'selesai' ? 'diterima' : ($status === 'dibatalkan' ? 'ditolak' : 'pending'),
-                'amount' => $order->total,
-                'paid_at' => $status === 'selesai' ? $orderedAt->copy()->addMinutes(5) : null,
-            ]);
+            // Payment method is only chosen once the provider has confirmed
+            // the order, so "menunggu" demo orders don't have one yet.
+            if ($status !== 'menunggu') {
+                $order->payment()->create([
+                    'method' => collect(['cash', 'transfer', 'qris'])->random(),
+                    'status' => $status === 'selesai' ? 'diterima' : ($status === 'dibatalkan' ? 'ditolak' : 'pending'),
+                    'amount' => $order->total,
+                    'paid_at' => $status === 'selesai' ? $orderedAt->copy()->addMinutes(5) : null,
+                ]);
+            }
 
             if ($status === 'dibatalkan') {
                 $order->issues()->create([

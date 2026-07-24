@@ -18,7 +18,7 @@ class CheckoutService
     /**
      * @param  array<int, array{menu_id: int, qty: int, note?: ?string}>  $items
      */
-    public function checkout(User $pemesan, Store $store, array $items, string $paymentMethod, ?string $notes = null): Order
+    public function checkout(User $pemesan, Store $store, array $items, ?string $notes = null): Order
     {
         if ($store->status !== 'aktif' || ! $store->provider?->isOpenNow()) {
             throw ValidationException::withMessages([
@@ -59,7 +59,7 @@ class CheckoutService
 
         $serviceFee = (int) $store->service_fee;
 
-        $order = DB::transaction(function () use ($pemesan, $store, $lineItems, $subtotal, $serviceFee, $paymentMethod, $notes) {
+        $order = DB::transaction(function () use ($pemesan, $store, $lineItems, $subtotal, $serviceFee, $notes) {
             $order = Order::create([
                 'kode_order' => 'WG'.strtoupper(Str::random(8)),
                 'user_id' => $pemesan->id,
@@ -69,7 +69,6 @@ class CheckoutService
                 'subtotal' => $subtotal,
                 'service_fee' => $serviceFee,
                 'total' => $subtotal + $serviceFee,
-                'payment_method' => $paymentMethod,
                 'notes' => $notes,
                 'divisi_snapshot' => $pemesan->divisi,
                 'lantai_snapshot' => $pemesan->lantai,
@@ -80,11 +79,9 @@ class CheckoutService
                 $order->items()->create($lineItem);
             }
 
-            $order->payment()->create([
-                'method' => $paymentMethod,
-                'status' => 'pending',
-                'amount' => $order->total,
-            ]);
+            // Payment method is chosen by the pemesan later, once the
+            // provider confirms the order — no point asking upfront if the
+            // store might turn out to be closed or the menu unavailable.
 
             $order->statusHistories()->create([
                 'changed_by' => $pemesan->id,

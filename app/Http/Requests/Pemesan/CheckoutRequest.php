@@ -4,7 +4,6 @@ namespace App\Http\Requests\Pemesan;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class CheckoutRequest extends FormRequest
 {
@@ -29,7 +28,6 @@ class CheckoutRequest extends FormRequest
             'items.*.menu_id' => ['required', 'integer'],
             'items.*.qty' => ['required', 'integer', 'min:1', 'max:20'],
             'items.*.note' => ['nullable', 'string', 'max:255'],
-            'payment_method' => ['required', Rule::in(['cash', 'transfer', 'qris'])],
             'notes' => ['nullable', 'string', 'max:1000'],
         ];
     }

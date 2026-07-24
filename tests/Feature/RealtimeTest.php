@@ -81,7 +81,6 @@ class RealtimeTest extends TestCase
         $this->actingAs($pemesan)->post(route('pemesan.checkout.store'), [
             'store_id' => $store->id,
             'items' => [['menu_id' => $menu->id, 'qty' => 1]],
-            'payment_method' => 'cash',
         ])->assertRedirect();
 
         Event::assertDispatched(NewOrderPlaced::class, fn ($event) => $event->order->provider_id === $provider->id);

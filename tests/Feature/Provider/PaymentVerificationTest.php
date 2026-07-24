@@ -31,7 +31,7 @@ class PaymentVerificationTest extends TestCase
         Notification::fake();
 
         $provider = $this->providerUser();
-        $order = Order::factory()->create(['provider_id' => $provider->provider->id, 'payment_method' => 'transfer']);
+        $order = Order::factory()->create(['provider_id' => $provider->provider->id]);
         $payment = Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'pending']);
         PaymentProof::factory()->create(['payment_id' => $payment->id]);
 
@@ -50,7 +50,7 @@ class PaymentVerificationTest extends TestCase
         Notification::fake();
 
         $provider = $this->providerUser();
-        $order = Order::factory()->create(['provider_id' => $provider->provider->id, 'payment_method' => 'transfer']);
+        $order = Order::factory()->create(['provider_id' => $provider->provider->id]);
         $payment = Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'pending']);
         PaymentProof::factory()->create(['payment_id' => $payment->id]);
 
@@ -66,7 +66,7 @@ class PaymentVerificationTest extends TestCase
     public function test_provider_cannot_accept_transfer_payment_without_proof(): void
     {
         $provider = $this->providerUser();
-        $order = Order::factory()->create(['provider_id' => $provider->provider->id, 'payment_method' => 'transfer']);
+        $order = Order::factory()->create(['provider_id' => $provider->provider->id]);
         $payment = Payment::factory()->create(['order_id' => $order->id, 'method' => 'transfer', 'status' => 'pending']);
 
         $response = $this->actingAs($provider)->patch(route('provider.orders.payment.verify', $order), [
@@ -80,7 +80,7 @@ class PaymentVerificationTest extends TestCase
     public function test_provider_can_accept_cash_payment_without_proof(): void
     {
         $provider = $this->providerUser();
-        $order = Order::factory()->create(['provider_id' => $provider->provider->id, 'payment_method' => 'cash']);
+        $order = Order::factory()->create(['provider_id' => $provider->provider->id]);
         $payment = Payment::factory()->create(['order_id' => $order->id, 'method' => 'cash', 'status' => 'pending']);
 
         $response = $this->actingAs($provider)->patch(route('provider.orders.payment.verify', $order), [
@@ -94,7 +94,7 @@ class PaymentVerificationTest extends TestCase
     public function test_provider_cannot_verify_another_providers_order_payment(): void
     {
         $provider = $this->providerUser();
-        $otherOrder = Order::factory()->create(['payment_method' => 'cash']);
+        $otherOrder = Order::factory()->create();
         Payment::factory()->create(['order_id' => $otherOrder->id, 'method' => 'cash', 'status' => 'pending']);
 
         $this->actingAs($provider)

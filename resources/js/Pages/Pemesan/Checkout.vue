@@ -6,16 +6,11 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { useCartStore } from '@/stores/cart';
 
-const props = defineProps({
-    paymentInfo: { type: Object, default: null },
-});
-
 const cart = useCartStore();
 
 const form = useForm({
     store_id: cart.storeId,
     items: cart.items.map((item) => ({ menu_id: item.menuId, qty: item.qty, note: item.note })),
-    payment_method: 'cash',
     notes: '',
 });
 
@@ -109,49 +104,10 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
             </div>
 
             <div class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
-                <InputLabel value="Metode Pembayaran" />
-                <div class="mt-2 space-y-2 text-sm">
-                    <label class="flex items-center gap-2">
-                        <input v-model="form.payment_method" type="radio" value="cash" class="text-primary-600 focus:ring-primary-500" />
-                        Cash (bayar langsung)
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input v-model="form.payment_method" type="radio" value="transfer" class="text-primary-600 focus:ring-primary-500" />
-                        Transfer Bank
-                    </label>
-                    <label class="flex items-center gap-2">
-                        <input v-model="form.payment_method" type="radio" value="qris" class="text-primary-600 focus:ring-primary-500" />
-                        QRIS
-                    </label>
-                </div>
-                <InputError class="mt-2" :message="form.errors.payment_method" />
-
-                <div
-                    v-if="form.payment_method === 'transfer' && paymentInfo"
-                    class="mt-3 rounded-lg bg-gray-50 p-3 text-sm dark:bg-gray-800"
-                >
-                    <p class="font-medium text-gray-700 dark:text-gray-200">{{ paymentInfo.nama_bank ?? '-' }}</p>
-                    <p class="text-gray-600 dark:text-gray-300">{{ paymentInfo.no_rekening ?? '-' }}</p>
-                    <p class="text-xs text-gray-400">a.n. {{ paymentInfo.nama_pemilik_rekening ?? '-' }}</p>
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Upload bukti transfer setelah pesanan dibuat, di halaman detail order.
-                    </p>
-                </div>
-
-                <div
-                    v-if="form.payment_method === 'qris' && paymentInfo"
-                    class="mt-3 rounded-lg bg-gray-50 p-3 text-center text-sm dark:bg-gray-800"
-                >
-                    <img
-                        v-if="paymentInfo.qris_image_url"
-                        :src="paymentInfo.qris_image_url"
-                        class="mx-auto h-40 w-40 object-contain"
-                    />
-                    <p v-else class="text-gray-400">Provider belum mengunggah QRIS.</p>
-                    <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        Upload bukti pembayaran setelah pesanan dibuat, di halaman detail order.
-                    </p>
-                </div>
+                <p class="rounded-lg bg-gray-50 p-3 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                    Metode pembayaran dipilih setelah penyedia jasa mengkonfirmasi pesanan Anda — toko bisa saja
+                    sedang tutup atau menunya tidak tersedia, jadi belum perlu dipilih sekarang.
+                </p>
 
                 <div class="mt-4">
                     <InputLabel for="notes" value="Catatan untuk pesanan (opsional)" />
