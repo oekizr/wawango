@@ -6,6 +6,19 @@ menggunakan [Semantic Versioning](https://semver.org/lang/id/) — setiap
 "Stage" pengembangan dipetakan sebagai satu versi minor (0.x.0), perbaikan
 kecil di antara stage sebagai versi patch.
 
+## [0.6.3] - Fix: order items list showed "x" / RpNaN
+
+### Diperbaiki
+- Daftar item pesanan di halaman detail Order (Pemesan & Provider) hanya
+  menampilkan satu baris kosong ("x" / "RpNaN") alih-alih daftar menu yang
+  dipesan. Penyebab: `OrderResource::items` masih memakai pola lama
+  `OrderItemResource::collection(...)` langsung (bukan `->resolve()` di
+  dalam closure `whenLoaded`, seperti field nested lain di resource yang
+  sama), sehingga koleksinya ikut terbungkus amplop `{"data": [...]}` —
+  gejala lanjutan dari bug yang sama dengan 0.6.2, di level yang lebih
+  dalam. Ditambahkan regression test yang menegaskan `order.items` adalah
+  array datar.
+
 ## [0.6.2] - Fix: order/provider/user detail pages showed blank data
 
 ### Diperbaiki

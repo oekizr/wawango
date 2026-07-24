@@ -35,7 +35,7 @@ class OrderResource extends JsonResource
             'confirmed_at' => $this->confirmed_at,
             'confirm_deadline' => $this->status === 'menunggu' ? $this->ordered_at?->copy()->addMinutes(10) : null,
             'completed_at' => $this->completed_at,
-            'items' => OrderItemResource::collection($this->whenLoaded('items')),
+            'items' => $this->whenLoaded('items', fn () => OrderItemResource::collection($this->items)->resolve()),
             'status_histories' => $this->whenLoaded('statusHistories', fn () => $this->statusHistories
                 ->sortBy('created_at')
                 ->values()
