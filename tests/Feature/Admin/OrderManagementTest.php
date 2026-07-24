@@ -31,11 +31,15 @@ class OrderManagementTest extends TestCase
 
     public function test_admin_can_view_order_detail(): void
     {
-        $order = Order::factory()->create();
+        $order = Order::factory()->create(['status' => 'menunggu']);
 
         $this->actingAs($this->admin())
             ->get(route('admin.orders.show', $order))
-            ->assertOk();
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Orders/Show')
+                ->where('order.id', $order->id)
+                ->where('order.status', 'menunggu'));
     }
 
     public function test_admin_can_update_order_status(): void

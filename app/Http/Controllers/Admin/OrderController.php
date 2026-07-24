@@ -48,7 +48,7 @@ class OrderController extends Controller
         $order->load(['user', 'store', 'provider.user', 'items', 'statusHistories.changedBy', 'issues', 'payment.proofs']);
 
         return Inertia::render('Admin/Orders/Show', [
-            'order' => new OrderResource($order),
+            'order' => (new OrderResource($order))->resolve(),
         ]);
     }
 

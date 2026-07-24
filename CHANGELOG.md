@@ -6,6 +6,21 @@ menggunakan [Semantic Versioning](https://semver.org/lang/id/) — setiap
 "Stage" pengembangan dipetakan sebagai satu versi minor (0.x.0), perbaikan
 kecil di antara stage sebagai versi patch.
 
+## [0.6.2] - Fix: order/provider/user detail pages showed blank data
+
+### Diperbaiki
+- Halaman detail Order (Admin/Provider/Pemesan) dan halaman edit
+  Provider/User (Admin) menampilkan field kosong/`RpNaN` karena resource
+  (`new OrderResource($order)` dkk.) dikirim langsung sebagai prop Inertia,
+  yang otomatis dibungkus amplop `{"data": {...}}` ala Laravel API — Vue
+  membaca `order.status` padahal isinya ada di `order.data.status`. Diganti
+  jadi `(new OrderResource($order))->resolve()` supaya prop-nya rata
+  (tanpa amplop), plus regression test (`assertInertia`) di 5 halaman
+  terkait supaya tidak terulang.
+- Halaman "Cari Penyedia Jasa" & detail penyedia jasa (modul Pemesan) tidak
+  lagi menampilkan daftar jam layanan — pemesan cukup lihat status
+  Buka/Tutup.
+
 ## [0.6.1] - Fix: application timezone
 
 ### Diperbaiki

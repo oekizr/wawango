@@ -47,6 +47,19 @@ class UserManagementTest extends TestCase
         $this->assertTrue($user->hasRole(RoleName::Pemesan->value));
     }
 
+    public function test_admin_can_view_user_edit_page(): void
+    {
+        $user = $this->pemesan();
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.users.edit', $user))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Users/Edit')
+                ->where('user.id', $user->id)
+                ->where('user.name', $user->name));
+    }
+
     public function test_admin_can_update_pemesan_user(): void
     {
         $user = $this->pemesan();

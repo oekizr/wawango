@@ -37,7 +37,7 @@ class OrderController extends Controller
         $order->load(['store', 'provider.user', 'items', 'statusHistories.changedBy', 'issues', 'payment.proofs', 'messages.sender']);
 
         return Inertia::render('Pemesan/Orders/Show', [
-            'order' => new OrderResource($order),
+            'order' => (new OrderResource($order))->resolve(),
         ]);
     }
 

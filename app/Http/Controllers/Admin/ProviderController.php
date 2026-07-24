@@ -62,7 +62,7 @@ class ProviderController extends Controller
         $provider->load('user', 'schedules');
 
         return Inertia::render('Admin/Providers/Edit', [
-            'provider' => new ProviderResource($provider),
+            'provider' => (new ProviderResource($provider))->resolve(),
         ]);
     }
 

@@ -31,9 +31,14 @@ class OrderViewTest extends TestCase
     public function test_pemesan_can_view_own_order_detail(): void
     {
         $user = $this->pemesanUser();
-        $order = Order::factory()->create(['user_id' => $user->id]);
+        $order = Order::factory()->create(['user_id' => $user->id, 'status' => 'menunggu']);
 
-        $this->actingAs($user)->get(route('pemesan.orders.show', $order))->assertOk();
+        $this->actingAs($user)->get(route('pemesan.orders.show', $order))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Pemesan/Orders/Show')
+                ->where('order.id', $order->id)
+                ->where('order.status', 'menunggu'));
     }
 
     public function test_pemesan_cannot_view_another_pemesans_order(): void

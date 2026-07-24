@@ -59,6 +59,19 @@ class ProviderManagementTest extends TestCase
         $this->assertCount(7, $provider->schedules);
     }
 
+    public function test_admin_can_view_provider_edit_page(): void
+    {
+        $provider = Provider::factory()->create();
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.providers.edit', $provider))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Admin/Providers/Edit')
+                ->where('provider.id', $provider->id)
+                ->where('provider.name', $provider->user->name));
+    }
+
     public function test_admin_can_update_provider(): void
     {
         $admin = $this->admin();

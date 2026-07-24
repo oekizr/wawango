@@ -25,13 +25,6 @@ defineProps({
             </div>
         </template>
 
-        <div class="mb-4 rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Jam Layanan</p>
-            <ul class="mt-1 space-y-0.5 text-sm text-gray-500 dark:text-gray-400">
-                <li v-for="(s, i) in provider.schedules" :key="i">{{ s.day }}: {{ s.open_time }}–{{ s.close_time }}</li>
-            </ul>
-        </div>
-
         <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">Toko</p>
         <div class="space-y-3">
             <Link

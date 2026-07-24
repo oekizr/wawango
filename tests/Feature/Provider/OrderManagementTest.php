@@ -33,9 +33,14 @@ class OrderManagementTest extends TestCase
     public function test_provider_can_view_own_order(): void
     {
         $user = $this->providerUser();
-        $order = $this->orderFor($user->provider);
+        $order = $this->orderFor($user->provider, 'menunggu');
 
-        $this->actingAs($user)->get(route('provider.orders.show', $order))->assertOk();
+        $this->actingAs($user)->get(route('provider.orders.show', $order))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Provider/Orders/Show')
+                ->where('order.id', $order->id)
+                ->where('order.status', 'menunggu'));
     }
 
     public function test_provider_cannot_view_another_providers_order(): void

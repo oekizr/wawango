@@ -47,11 +47,6 @@ function applySearch() {
                         {{ provider.is_open ? 'Buka' : 'Tutup' }}
                     </Badge>
                 </div>
-                <ul class="mt-2 space-y-0.5 text-xs text-gray-400">
-                    <li v-for="(s, i) in provider.schedules" :key="i">
-                        {{ s.day }}: {{ s.open_time }}–{{ s.close_time }}
-                    </li>
-                </ul>
             </component>
 
             <p v-if="providers.length === 0" class="col-span-2 py-8 text-center text-gray-400">

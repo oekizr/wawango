@@ -58,7 +58,7 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         return Inertia::render('Admin/Users/Edit', [
-            'user' => new UserResource($user),
+            'user' => (new UserResource($user))->resolve(),
         ]);
     }
 
