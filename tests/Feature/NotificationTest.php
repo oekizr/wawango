@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleName;
 use App\Models\Order;
 use App\Models\User;
 use App\Notifications\OrderNotConfirmedNotification;
@@ -40,5 +41,23 @@ class NotificationTest extends TestCase
             ->assertForbidden();
 
         $this->assertNull($notification->fresh()->read_at);
+    }
+
+    public function test_shared_notifications_prop_flags_read_vs_unread(): void
+    {
+        $user = User::factory()->create();
+        $user->assignRole(RoleName::Pemesan->value);
+        $order = Order::factory()->create(['user_id' => $user->id]);
+
+        $user->notify(new OrderNotConfirmedNotification($order));
+        $user->notify(new OrderNotConfirmedNotification($order));
+        $user->unreadNotifications()->first()->markAsRead();
+
+        $response = $this->actingAs($user)->get(route('pemesan.dashboard'));
+        $props = $response->viewData('page')['props'];
+
+        $this->assertSame(1, $props['notifications']['unread_count']);
+        $readFlags = collect($props['notifications']['items'])->pluck('is_read')->sort()->values()->all();
+        $this->assertSame([false, true], $readFlags);
     }
 }

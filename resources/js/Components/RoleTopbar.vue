@@ -180,7 +180,7 @@ function openNotification(notification) {
                                 class="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-gray-50 dark:text-gray-200 dark:hover:bg-gray-800"
                                 @click="openNotification(item)"
                             >
-                                <p>{{ item.message }}</p>
+                                <p :class="item.is_read ? 'font-normal' : 'font-semibold'">{{ item.message }}</p>
                                 <p class="mt-0.5 text-xs text-gray-400">
                                     {{ new Date(item.created_at).toLocaleString('id-ID') }}
                                 </p>

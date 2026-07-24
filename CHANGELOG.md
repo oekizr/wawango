@@ -6,6 +6,15 @@ menggunakan [Semantic Versioning](https://semver.org/lang/id/) — setiap
 "Stage" pengembangan dipetakan sebagai satu versi minor (0.x.0), perbaikan
 kecil di antara stage sebagai versi patch.
 
+## [0.8.1] - Notifikasi belum dibaca ditampilkan tebal
+
+### Diubah
+- Dropdown bell notifikasi (semua role) kini menampilkan 10 notifikasi
+  terbaru (sebelumnya hanya yang belum dibaca), dengan yang **belum
+  dibaca** ditampilkan tebal (bold) supaya mudah dibedakan dari yang
+  sudah dibaca. Badge jumlah di ikon lonceng tetap hanya menghitung yang
+  belum dibaca.
+
 ## [0.8.0] - Metode pembayaran dipilih setelah konfirmasi
 
 ### Diubah

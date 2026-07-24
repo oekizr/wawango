@@ -19,6 +19,7 @@ export const useNotificationsStore = defineStore('notifications', {
                     id: notification.id,
                     message: notification.message,
                     created_at: notification.created_at ?? new Date().toISOString(),
+                    is_read: false,
                     url: notification.url ?? null,
                 },
                 ...this.items,

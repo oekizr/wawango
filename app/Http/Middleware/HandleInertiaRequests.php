@@ -42,10 +42,11 @@ class HandleInertiaRequests extends Middleware
             ],
             'notifications' => $user ? [
                 'unread_count' => $user->unreadNotifications()->count(),
-                'items' => $user->unreadNotifications()->latest()->limit(10)->get()->map(fn (DatabaseNotification $n) => [
+                'items' => $user->notifications()->latest()->limit(10)->get()->map(fn (DatabaseNotification $n) => [
                     'id' => $n->id,
                     'message' => $n->data['message'] ?? '',
                     'created_at' => $n->created_at,
+                    'is_read' => $n->read_at !== null,
                     'url' => $this->resolveNotificationUrl($n, $role),
                 ]),
             ] : null,
