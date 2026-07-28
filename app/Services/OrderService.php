@@ -4,12 +4,15 @@ namespace App\Services;
 
 use App\Enums\OrderStatus;
 use App\Events\OrderStatusChanged;
+use App\Mail\OrderReceiptMail;
 use App\Models\Order;
 use App\Models\User;
 use App\Notifications\OrderCancelledNotification;
 use App\Notifications\OrderNotConfirmedNotification;
 use App\Notifications\OrderStatusNotification;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class OrderService
@@ -156,6 +159,29 @@ class OrderService
             $order->user?->notify(new OrderStatusNotification($order, OrderStatus::from($status)));
         }
 
+        if ($status === OrderStatus::Selesai->value) {
+            $this->sendReceiptEmail($order);
+        }
+
         return $order;
+    }
+
+    /**
+     * Best-effort: a failed/misconfigured mailer should never break the
+     * provider's ability to mark an order complete.
+     */
+    private function sendReceiptEmail(Order $order): void
+    {
+        if (! $order->user?->email) {
+            return;
+        }
+
+        try {
+            $order->loadMissing(['items', 'store', 'provider.user']);
+
+            Mail::to($order->user->email)->send(new OrderReceiptMail($order));
+        } catch (\Throwable $e) {
+            Log::error("Gagal mengirim invoice email untuk order {$order->kode_order}: {$e->getMessage()}");
+        }
     }
 }
