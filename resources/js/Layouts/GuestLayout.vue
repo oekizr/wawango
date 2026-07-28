@@ -9,7 +9,7 @@ import { Link } from '@inertiajs/vue3';
     >
         <div>
             <Link href="/">
-                <BrandLogo size="lg" with-tagline />
+                <BrandLogo size="lg" />
             </Link>
         </div>
 
