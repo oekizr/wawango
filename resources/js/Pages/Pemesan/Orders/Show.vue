@@ -4,14 +4,17 @@ import Badge from '@/Components/Badge.vue';
 import ChatThread from '@/Components/Chat/ChatThread.vue';
 import InputError from '@/Components/InputError.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import Toast from '@/Components/Toast.vue';
 import Echo from '@/echo';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { computed, onMounted, onUnmounted } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const props = defineProps({
     order: { type: Object, required: true },
     paymentInfo: { type: Object, default: null },
 });
+
+const toastRef = ref(null);
 
 onMounted(() => {
     Echo.private(`orders.${props.order.id}`).listen('.status.changed', () => {
@@ -23,8 +26,27 @@ onUnmounted(() => {
     Echo.leave(`orders.${props.order.id}`);
 });
 
-const paymentStatusTones = { pending: 'yellow', diterima: 'green', ditolak: 'red' };
-const paymentStatusLabels = { pending: 'Menunggu Verifikasi', diterima: 'Diterima', ditolak: 'Ditolak' };
+const paymentStatusTones = { belum_bayar: 'yellow', menunggu_verifikasi: 'blue', diterima: 'green', ditolak: 'red' };
+const paymentStatusLabels = {
+    belum_bayar: 'Menunggu Pembayaran',
+    menunggu_verifikasi: 'Menunggu Verifikasi',
+    diterima: 'Diterima',
+    ditolak: 'Ditolak',
+};
+
+// The `payments` table only has pending/diterima/ditolak — "pending" alone
+// doesn't distinguish "no proof uploaded yet" from "proof sent, waiting on
+// the provider to review it", which is exactly the reaction the buyer was
+// missing after tapping Kirim Bukti. Derive that extra state client-side
+// from whether a proof has actually landed.
+const paymentDisplayStatus = computed(() => {
+    const payment = props.order.payment;
+    if (!payment) return null;
+    if (payment.status === 'pending') {
+        return payment.proof_url ? 'menunggu_verifikasi' : 'belum_bayar';
+    }
+    return payment.status;
+});
 
 const canUploadProof = computed(() => {
     const payment = props.order.payment;
@@ -36,7 +58,10 @@ const proofForm = useForm({ bukti: null });
 function submitProof() {
     proofForm.post(route('pemesan.orders.paymentProof.store', props.order.id), {
         forceFormData: true,
-        onSuccess: () => (proofForm.bukti = null),
+        onSuccess: () => {
+            proofForm.bukti = null;
+            toastRef.value?.push('Bukti pembayaran berhasil dikirim, menunggu verifikasi penyedia jasa.');
+        },
     });
 }
 
@@ -85,6 +110,7 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
 
 <template>
     <Head :title="`Order ${order.kode_order}`" />
+    <Toast ref="toastRef" />
 
     <PemesanLayout>
         <template #header>
@@ -186,11 +212,15 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
                         v-if="methodForm.method === 'qris' && paymentInfo"
                         class="mt-3 rounded-lg bg-gray-50 p-3 text-center text-sm dark:bg-gray-800"
                     >
-                        <img
-                            v-if="paymentInfo.qris_image_url"
-                            :src="paymentInfo.qris_image_url"
-                            class="mx-auto h-40 w-40 object-contain"
-                        />
+                        <template v-if="paymentInfo.qris_image_url">
+                            <img
+                                :src="paymentInfo.qris_image_url"
+                                class="mx-auto h-40 w-40 object-contain"
+                            />
+                            <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                Silahkan scan QR di atas dan jangan lupa lampirkan buktinya.
+                            </p>
+                        </template>
                         <p v-else class="text-gray-400">Provider belum mengunggah QRIS.</p>
                     </div>
 
@@ -203,8 +233,8 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
             <div v-if="order.payment" class="rounded-xl bg-white p-4 shadow-sm dark:bg-surface-darkMuted">
                 <div class="mb-3 flex items-center justify-between">
                     <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-200">Pembayaran</h2>
-                    <Badge :tone="paymentStatusTones[order.payment.status]">
-                        {{ paymentStatusLabels[order.payment.status] }}
+                    <Badge :tone="paymentStatusTones[paymentDisplayStatus]">
+                        {{ paymentStatusLabels[paymentDisplayStatus] }}
                     </Badge>
                 </div>
                 <p class="text-sm text-gray-600 dark:text-gray-300">
@@ -229,7 +259,7 @@ const rupiah = (v) => 'Rp'.concat(new Intl.NumberFormat('id-ID').format(v));
                     />
                     <InputError class="mt-1" :message="proofForm.errors.bukti" />
                     <PrimaryButton class="mt-2" :disabled="proofForm.processing || !proofForm.bukti">
-                        Kirim Bukti
+                        {{ proofForm.processing ? 'Mengirim...' : 'Kirim Bukti' }}
                     </PrimaryButton>
                 </form>
             </div>
